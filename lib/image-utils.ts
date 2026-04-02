@@ -1,4 +1,10 @@
-import { DrupalArticle } from './types'
+interface DrupalImage {
+  url: string
+  alt?: string
+  width?: number
+  height?: number
+  variations?: { name: string; url: string; width: number; height: number }[]
+}
 
 export type ImageSize = 'THUMBNAIL' | 'MEDIUM' | 'LARGE'
 
@@ -24,7 +30,7 @@ function proxyDrupalUrl(url: string): string {
  * Get the best image URL for a given size preference
  */
 export function getImageUrl(
-  image: DrupalArticle['image'],
+  image: DrupalImage,
   preferredSize: ImageSize = 'MEDIUM',
   context: 'hero' | 'teaser' | 'thumbnail' | 'full' = 'full'
 ): string {
@@ -46,7 +52,7 @@ export function getImageUrl(
  * Get image dimensions for a given size preference
  */
 export function getImageDimensions(
-  image: DrupalArticle['image'],
+  image: DrupalImage,
   preferredSize: ImageSize = 'MEDIUM'
 ): { width: number; height: number } | null {
   if (!image) return null
@@ -73,7 +79,7 @@ export function getImageDimensions(
  * Get the aspect ratio for an image
  */
 export function getAspectRatio(
-  image: DrupalArticle['image'],
+  image: DrupalImage,
   preferredSize: ImageSize = 'MEDIUM'
 ): number | null {
   const dimensions = getImageDimensions(image, preferredSize)

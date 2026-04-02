@@ -1,5 +1,4 @@
 import './globals.css'
-import ApolloProvider from './components/providers/ApolloProvider'
 import { Viewport, type Metadata } from 'next'
 
 export const viewport: Viewport = {
@@ -25,7 +24,7 @@ export const metadata: Metadata = {
     default: 'Decoupled Drupal',
     template: '%s | Decoupled Drupal'
   },
-  description: 'A minimal headless Drupal starter with Next.js and GraphQL.',
+  description: 'A minimal headless Drupal starter with Next.js.',
 }
 
 export default function RootLayout({
@@ -36,9 +35,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="font-sans">
-        <ApolloProvider>
-          {children}
-        </ApolloProvider>
+        {children}
       </body>
     </html>
   )

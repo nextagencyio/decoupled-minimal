@@ -1,11 +1,8 @@
-import Header from './components/Header'
-import { headers } from 'next/headers'
-import { getServerApolloClient } from '../lib/apollo-client'
-import { GET_NODE_BY_PATH } from '../lib/queries'
-import { checkConfiguration } from '../lib/config-check'
+export const dynamic = 'force-dynamic'
 
-// Enable ISR with 1 hour revalidation
-export const revalidate = 3600
+import Header from './components/Header'
+import { checkConfiguration } from '../lib/config-check'
+import { getClient } from '@/lib/drupal-client'
 
 export default async function Home() {
   const configStatus = checkConfiguration()
@@ -30,6 +27,7 @@ export default async function Home() {
             </div>
             <p className="text-sm text-gray-500 mt-4">
               Copy <code>.env.example</code> to <code>.env.local</code> and fill in your Drupal credentials.
+              Then run <code>npx decoupled-cli schema sync</code> to generate typed client.
             </p>
           </div>
         </main>
@@ -37,19 +35,12 @@ export default async function Home() {
     )
   }
 
-  const requestHeaders = await headers()
-  const apolloClient = getServerApolloClient(requestHeaders)
-
   try {
-    const { data } = await apolloClient.query({
-      query: GET_NODE_BY_PATH,
-      variables: { path: '/' },
-      fetchPolicy: 'cache-first',
-    })
+    const client = getClient()
+    const page = await client.getEntryByPath('/')
 
-    const entity = data?.route?.entity
-    const title = entity?.title || 'Welcome'
-    const bodyHtml = entity?.body?.processed || ''
+    const title = page?.title || 'Welcome'
+    const bodyHtml = (page as any)?.body?.processed || ''
 
     return (
       <div className="min-h-screen bg-gray-50">
@@ -76,7 +67,7 @@ export default async function Home() {
           <div className="bg-white rounded-lg shadow-sm p-6 md:p-8 text-center">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Welcome</h1>
             <p className="text-gray-600">
-              Your Drupal backend is connected. Create a homepage node to see content here.
+              Your Drupal backend is connected. Create content to see it here.
             </p>
           </div>
         </main>

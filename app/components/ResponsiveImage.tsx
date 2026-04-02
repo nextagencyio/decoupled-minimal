@@ -1,9 +1,16 @@
 import Image from 'next/image'
-import { DrupalArticle } from '@/lib/types'
 import { getImageUrl, getAspectRatio, type ImageSize } from '@/lib/image-utils'
 
+interface DrupalImage {
+  url: string
+  alt?: string
+  width?: number
+  height?: number
+  variations?: { name: string; url: string; width: number; height: number }[]
+}
+
 interface ResponsiveImageProps {
-  image: DrupalArticle['image']
+  image: DrupalImage
   alt?: string
   className?: string
   priority?: boolean

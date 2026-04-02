@@ -1,21 +1,18 @@
+export const dynamic = 'force-dynamic'
+
 import Header from '../components/Header'
 import ErrorBoundary from '../components/ErrorBoundary'
 import ResponsiveImage from '../components/ResponsiveImage'
-import { headers } from 'next/headers'
 import { Metadata } from 'next'
-import { GET_NODE_BY_PATH } from '@/lib/queries'
-import { getServerApolloClient } from '@/lib/apollo-client'
-
-export const revalidate = 300
+import { getClient } from '@/lib/drupal-client'
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string[] }> }): Promise<Metadata> {
   const resolvedParams = await params
   const path = `/${(resolvedParams.slug || []).join('/')}`
   try {
-    const apollo = getServerApolloClient(await headers())
-    const { data } = await apollo.query({ query: GET_NODE_BY_PATH, variables: { path } })
-    const title = data?.route?.entity?.title || 'Page'
-    return { title }
+    const client = getClient()
+    const page = await client.getEntryByPath(path)
+    return { title: page?.title || 'Page' }
   } catch {
     return { title: 'Page' }
   }
@@ -36,12 +33,10 @@ function PageNotFound({ path }: { path: string }) {
 export default async function GenericPage({ params }: { params: Promise<{ slug: string[] }> }) {
   const resolvedParams = await params
   const path = `/${(resolvedParams.slug || []).join('/')}`
-  const apollo = getServerApolloClient(await headers())
 
   try {
-    const result = await apollo.query({ query: GET_NODE_BY_PATH, variables: { path }, fetchPolicy: 'no-cache' })
-    const { data } = result
-    const entity = data?.route?.entity
+    const client = getClient()
+    const entity = await client.getEntryByPath(path)
 
     if (!entity) {
       return (
@@ -55,8 +50,8 @@ export default async function GenericPage({ params }: { params: Promise<{ slug: 
     }
 
     const title = entity.title || 'Untitled'
-    const bodyHtml = entity?.body?.processed || ''
-    const image = entity?.image
+    const bodyHtml = (entity as any)?.body?.processed || ''
+    const image = (entity as any)?.image
 
     return (
       <div className="min-h-screen bg-gray-50">
